@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TZLOM စာရင်းကိုင် Webapp</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+
+    <nav class="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('tab-receipt')">ပြေစာ</button>
+        <button class="tab-btn" onclick="switchTab('tab-sales')">အရောင်းစာရင်း</button>
+        <button class="tab-btn" onclick="switchTab('tab-summary')">ပေါင်းချုပ်</button>
+        <button class="tab-btn" onclick="switchTab('tab-inventory')">ပစ္စည်းလက်ကျန်</button>
+        <button class="tab-btn" onclick="switchTab('tab-setting')">Setting</button>
+    </nav>
+
+    <main class="container">
+
+        <section id="tab-receipt" class="tab-content active">
+            <div class="card-header badge-green">ပြေစာ</div>
+            <div class="meta-row">
+                <span id="receipt-datetime">01-01-2026 (13:30)PM</span>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ပစ္စည်း</th>
+                            <th>အရေအတွက်</th>
+                            <th>ဈေးနှုန်း</th>
+                            <th>သင့်ငွေ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ကြယ်-ကြီး</td>
+                            <td><input type="number" id="qty-star-big" value="0" min="0" oninput="calculateReceipt()"></td>
+                            <td><span id="price-star-big">0</span></td>
+                            <td><span id="total-star-big">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>ကြယ်-သေး</td>
+                            <td><input type="number" id="qty-star-small" value="0" min="0" oninput="calculateReceipt()"></td>
+                            <td><span id="price-star-small">0</span></td>
+                            <td><span id="total-star-small">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-ကြီး</td>
+                            <td><input type="number" id="qty-yoe-big" value="0" min="0" oninput="calculateReceipt()"></td>
+                            <td><span id="price-yoe-big">0</span></td>
+                            <td><span id="total-yoe-big">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-သေး</td>
+                            <td><input type="number" id="qty-yoe-small" value="0" min="0" oninput="calculateReceipt()"></td>
+                            <td><span id="price-yoe-small">0</span></td>
+                            <td><span id="total-yoe-small">0</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grand-total-box">
+                <span>သင့်ငွေ စုစုပေါင်း:</span>
+                <span id="receipt-grand-total">0</span>
+            </div>
+
+            <div class="input-group">
+                <label>ဆိုင်အမည်</label>
+                <input type="text" id="shop-name" placeholder="ဆိုင်အမည် ထည့်ပါ">
+            </div>
+            <div class="input-group">
+                <label>ဖုန်းနံပါတ်</label>
+                <input type="tel" id="shop-phone" placeholder="ဖုန်းနံပါတ် ထည့်ပါ">
+            </div>
+            <div class="input-group">
+                <label>မှတ်ချက်</label>
+                <input type="text" id="receipt-note" placeholder="မှတ်ချက်ထည့်ရန်">
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-green" onclick="saveInvoice('Paid')">ငွေချေပြီး</button>
+                <button class="btn btn-red" onclick="saveInvoice('Due')">ငွေချေရန်ကျန်</button>
+            </div>
+
+            <button class="btn btn-yellow btn-block" style="margin-top: 15px;" onclick="saveInvoice('Pending')">စာရင်းသွင်းမည်</button>
+        </section>
+
+        <section id="tab-sales" class="tab-content">
+            <div class="card-header badge-blue">အရောင်းစာရင်း</div>
+            <div class="table-responsive" style="margin-top: 15px;">
+                <table id="sales-list-table">
+                    <thead>
+                        <tr>
+                            <th>ရက်စွဲ</th>
+                            <th>ဆိုင်အမည်</th>
+                            <th>စုစုပေါင်း</th>
+                            <th>အခြေအနေ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-list-body">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-summary" class="tab-content">
+            <div class="card-header badge-green">အရောင်းစာရင်း ပေါင်းချုပ်</div>
+            <div class="date-filter-row">
+                <input type="date" id="filter-start-date"> မှ
+                <input type="date" id="filter-end-date"> ထိ
+                <button class="btn btn-blue" onclick="renderSummary()">ရှာမည်</button>
+            </div>
+
+            <div class="table-responsive" style="margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ပစ္စည်းအမျိုးအစား</th>
+                            <th>အရေအတွက်</th>
+                            <th>သင့်ငွေ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ကြယ်-ကြီး</td>
+                            <td id="sum-qty-star-big">0</td>
+                            <td id="sum-amt-star-big">0</td>
+                        </tr>
+                        <tr>
+                            <td>ကြယ်-သေး</td>
+                            <td id="sum-qty-star-small">0</td>
+                            <td id="sum-amt-star-small">0</td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-ကြီး</td>
+                            <td id="sum-qty-yoe-big">0</td>
+                            <td id="sum-amt-yoe-big">0</td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-သေး</td>
+                            <td id="sum-qty-yoe-small">0</td>
+                            <td id="sum-amt-yoe-small">0</td>
+                        </tr>
+                        <tr class="grand-total-row">
+                            <td>သင့်ငွေ စုစုပေါင်း</td>
+                            <td>-</td>
+                            <td id="sum-grand-total">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary-cards-grid">
+                <div class="summary-card card-blue">
+                    <h3>ဆိုင်အရေအတွက်</h3>
+                    <p id="sum-shop-count">0</p>
+                </div>
+                <div class="summary-card card-green">
+                    <h3>ငွေချေပြီး</h3>
+                    <p id="sum-paid-total">0</p>
+                </div>
+                <div class="summary-card card-red">
+                    <h3>ငွေချေရန်ကျန်</h3>
+                    <p id="sum-due-total">0</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-inventory" class="tab-content">
+            <div class="card-header badge-orange">ပစ္စည်း လက်ကျန်</div>
+            
+            <div class="table-responsive" style="margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ပစ္စည်း</th>
+                            <th>ရရှိအရေအတွက် (ရိုက်ထည့်ပါ)</th>
+                            <th>အရောင်းစာရင်းမှ (Auto)</th>
+                            <th>ပစ္စည်းလက်ကျန်</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ကြယ်-ကြီး</td>
+                            <td><input type="number" id="inv-stock-star-big" value="0" min="0" oninput="saveInventoryStock()"></td>
+                            <td id="inv-auto-star-big">0</td>
+                            <td id="inv-rem-star-big" class="bold-text">0</td>
+                        </tr>
+                        <tr>
+                            <td>ကြယ်-သေး</td>
+                            <td><input type="number" id="inv-stock-star-small" value="0" min="0" oninput="saveInventoryStock()"></td>
+                            <td id="inv-auto-star-small">0</td>
+                            <td id="inv-rem-star-small" class="bold-text">0</td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-ကြီး</td>
+                            <td><input type="number" id="inv-stock-yoe-big" value="0" min="0" oninput="saveInventoryStock()"></td>
+                            <td id="inv-auto-yoe-big">0</td>
+                            <td id="inv-rem-yoe-big" class="bold-text">0</td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-သေး</td>
+                            <td><input type="number" id="inv-stock-yoe-small" value="0" min="0" oninput="saveInventoryStock()"></td>
+                            <td id="inv-auto-yoe-small">0</td>
+                            <td id="inv-rem-yoe-small" class="bold-text">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="info-box">
+                <h4>အသုံးပြုသူသို့ *အကြံပြုချက်*</h4>
+                <ul>
+                    <li>ပစ္စည်းဝယ်ယူသည့်စာရင်းကို သီးခြားမှတ်ပါ။</li>
+                    <li>ဈေးနှုန်းသတ်မှတ်ချက်ကို သီးခြားမှတ်ပါ။</li>
+                    <li>ပစ္စည်းလက်ကျန်ကို အမြဲတမ်း စစ်ဆေးပါ။</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tab-setting" class="tab-content">
+            <div class="card-header badge-blue" style="background-color: #2563eb;">Setting</div>
+            
+            <div class="table-responsive" style="margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ပစ္စည်း</th>
+                            <th>ဈေးနှုန်း</th>
+                            <th>လုပ်ဆောင်ချက်</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ကြယ်-ကြီး</td>
+                            <td><input type="number" id="set-price-star-big" value="0"></td>
+                            <td><button class="btn btn-blue btn-sm" onclick="savePrice('star-big')">Save</button></td>
+                        </tr>
+                        <tr>
+                            <td>ကြယ်-သေး</td>
+                            <td><input type="number" id="set-price-star-small" value="0"></td>
+                            <td><button class="btn btn-blue btn-sm" onclick="savePrice('star-small')">Save</button></td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-ကြီး</td>
+                            <td><input type="number" id="set-price-yoe-big" value="0"></td>
+                            <td><button class="btn btn-blue btn-sm" onclick="savePrice('yoe-big')">Save</button></td>
+                        </tr>
+                        <tr>
+                            <td>ယိုး-သေး</td>
+                            <td><input type="number" id="set-price-yoe-small" value="0"></td>
+                            <td><button class="btn btn-blue btn-sm" onclick="savePrice('yoe-small')">Save</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">အသေးစိတ်အချက်အလက်</h2>
+            <hr>
+            <div id="modal-body-content">
+                </div>
+            <hr style="margin-top: 15px;">
+            <div class="modal-actions">
+                <button class="btn btn-blue" id="modal-btn-edit">ပြင်ဆင်မည်</button>
+                <button class="btn btn-green" id="modal-btn-save" style="display:none;">သိမ်းမည်</button>
+                <button class="btn btn-red" id="modal-btn-delete">ဖျက်မည်</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Support by GitHub. | Power by Gemini. | Idea by TZLOM.
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        // PWA Service Worker Register ခြင်း
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log("Service Worker Registered Successfully."))
+            .catch(err => console.log("Service Worker Failed:", err));
+        }
+    </script>
+</body>
+</html>
